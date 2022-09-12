@@ -1,0 +1,15 @@
+body {
+    position: relative;
+    min-height: 100vh;
+}
+
+.container {
+    display: block;
+    position: fixed;
+    top: 100px;
+    left: 260px;  
+    height: 100px;
+    width: 1000px; 
+}
+
+
