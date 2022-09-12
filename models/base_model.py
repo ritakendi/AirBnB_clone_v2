@@ -1,12 +1,31 @@
 #!/usr/bin/python3
-"""Base class Definition"""
+"""
+    This module defines Base class Definition
+"""
 import uuid
 import models
 from datetime import datetime
+from sqlalchemy import Column, String, DateTime
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
 
 
 class BaseModel:
-    """ BaseModel definition"""
+    """ 
+        Base class for other classes to be used for the duratopn
+    """
+    id = Column(String(60),
+                primary_key=True,
+                nullable=False)
+
+    created_at = Column(DateTime,
+                        default=datetime.utcnow(),
+                        nullable=False)
+
+    updated_at = Column(DateTime,
+                        default=datetime.utcnow(),
+                        nullable=False)
 
     def __init__(self, *args, **kwargs):
         """init method to initialize the values
@@ -31,8 +50,7 @@ class BaseModel:
             self.id = str(uuid.uuid4())
             self.created_at = datetime.now()
             self.updated_at = datetime.now()
-            models.storage.new(self)
-
+            
     def __str__(self):
         """ method to format BaseModel for printing.
         We want to override the default __str__ out put to
@@ -46,7 +64,11 @@ class BaseModel:
         We want to update the attribute updated_at with a newer time.
         We then store the model in our storage data base """
         self.updated_at = datetime.now()
+        models.storage.new(self)
         models.storage.save()
+
+
+
 
     def to_dict(self):
         """ make dictionary with instance attributes.
