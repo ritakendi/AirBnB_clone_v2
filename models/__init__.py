@@ -11,9 +11,10 @@ from models.review import Review
 from os import environ
 
 if environ.get('HBNB_TYPE_STORAGE') == 'db':
-    from models.engine.db_storage import DBStorage
+   """ from models.engine.db_storage import DBStorage
     storage = DBStorage()
-    storage.reload()
+    storage.reload()"""
+    pass
 
 else:
     from models.engine.file_storage import FileStorage
