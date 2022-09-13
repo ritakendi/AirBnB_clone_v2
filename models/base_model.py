@@ -1,85 +1,94 @@
-#!/usr/bin/python3
-"""
-    This module defines Base class Definition
-"""
+#!/usr/bin/python2
+"""This is the base model class for AirBnB"""
 import uuid
 import models
-from datetime import datetime
-from sqlalchemy import Column, String, DateTime
+import datetime
+from sqlalchemy import Column, String, Integer, DateTime
 from sqlalchemy.ext.declarative import declarative_base
+
 
 Base = declarative_base()
 
 
 class BaseModel:
-    """ 
-        Base class for other classes to be used for the duratopn
+    """This class will defines all common attributes/methods
+    for other classes
     """
     id = Column(String(60),
-                primary_key=True,
-                nullable=False)
+                unique=True,
+                nullable=False,
+                primary_key=True)
 
     created_at = Column(DateTime,
-                        default=datetime.utcnow(),
+                        default=datetime.datetime.utcnow(),
                         nullable=False)
 
     updated_at = Column(DateTime,
-                        default=datetime.utcnow(),
+                        default=datetime.datetime.utcnow(),
                         nullable=False)
 
     def __init__(self, *args, **kwargs):
-        """init method to initialize the values
-        We ignore all args. No error or handling for that.
-        We only care for keyworded arguments"""
-        if (kwargs):
-            for k, v in kwargs.items():
-                if (k == 'created_at' or k == 'updated_at'):
-                    setattr(self, k, datetime.strptime(
-                          v, "%Y-%m-%dT%H:%M:%S.%f"))
-                # if we would a key that matched,
-                # set attribute to year, month, day, hour, minutes, sec
-                elif k == '__class__':
-                    pass
-                # we just skip class if that is the key, do not modify that
-                else:
-                    setattr(self, k, v)
-                # set whatever value given to us to the appropriate key
+        """Instantiation of base model class
+        Args:
+            args: it won't be used
+            kwargs: arguments for the constructor of the BaseModel
+        Attributes:
+            id: unique id generated
+            created_at: creation date
+            updated_at: updated date
+        """
+        if kwargs:
+            for key, value in kwargs.items():
+                if key == "created_at" or key == "updated_at":
+                    value = datetime.datetime.strptime(
+                                value, "%Y-%m-%dT%H:%M:%S.%f")
+                if key != "__class__":
+                    setattr(self, key, value)
+            if "id" not in kwargs.keys():
+                self.id = str(uuid.uuid4())
+                self.created_at = self.updated_at = datetime.datetime.now()
         else:
-            # not a dict was given to us. we were given a command like
-            # create User. and we will use uuid and date now to instantiate
             self.id = str(uuid.uuid4())
-            self.created_at = datetime.now()
-            self.updated_at = datetime.now()
-            
+            self.created_at = self.updated_at = datetime.datetime.now()
+
     def __str__(self):
-        """ method to format BaseModel for printing.
-        We want to override the default __str__ out put to
-        name of object and the id and the dict """
-        thestr = "[{:s}] ({:s}) {}".format(
-              type(self).__name__, self.id, self.__dict__)
-        return thestr
+        """returns a string
+        Return:
+            returns a string of class name, id, and dictionary
+        """
+        return "[{}] ({}) {}".format(
+            type(self).__name__, self.id, self.__dict__)
+
+    def __repr__(self):
+        """return a string representaion
+        """
+        return self.__str__()
 
     def save(self):
-        """ method to save the object.
-        We want to update the attribute updated_at with a newer time.
-        We then store the model in our storage data base """
-        self.updated_at = datetime.now()
+        """updates the public instance attribute updated_at to current
+        """
+        self.updated_at = datetime.datetime.now()
         models.storage.new(self)
         models.storage.save()
 
-
-
-
     def to_dict(self):
-        """ make dictionary with instance attributes.
-        We store the name of the object as the class.
-        We loop through all the attributes and store it in a dict.
-        If the attribute was time related, we convert to iso format """
-        temp_dict = {}
-        temp_dict['__class__'] = type(self).__name__
-        for k, v in self.__dict__.items():
-            if k == 'created_at' or k == 'updated_at':
-                temp_dict[k] = v.isoformat()
-            else:
-                temp_dict[k] = v
-        return temp_dict
+        """creates dictionary of the class  and returns
+        Return:
+            returns a dictionary of all the key values in __dict__
+        """
+        my_dict = dict(self.__dict__)
+        if "_sa_instance_state" in my_dict.keys():
+            del my_dict["_sa_instance_state"]
+        # except KeyError:
+            # pass
+        my_dict["__class__"] = str(type(self).__name__)
+        my_dict["created_at"] = self.created_at.isoformat()
+        my_dict["updated_at"] = self.updated_at.isoformat()
+
+        return my_dict
+
+    def delete(self):
+        """ Ohhhh hohohh that hurt
+        - Jen. (this is method that deletes btw)
+        """
+        models.storage.delete(self)
