@@ -1,11 +1,22 @@
 #!/usr/bin/python3
-""" A City class that inherits from BaseModel """
+"""This is the city class"""
+from models.base_model import BaseModel, Base
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship, backref
 
-from models.base_model import BaseModel
 
-
-class City(BaseModel):
-    """ Inherits from BaseModel,
-    instantiate with empty string as values for attributes """
-    state_id = ""
-    name = ""
+class City(BaseModel, Base):
+    """This is the class for City
+    Attributes:
+        state_id: The state id
+        name: input name
+    """
+    __tablename__ = "cities"
+    name = Column(String(128),
+                  nullable=False)
+    state_id = Column(String(60),
+                      ForeignKey("states.id"),
+                      nullable=False)
+    places = relationship("Place",
+                          backref="cities",
+                          cascade="all, delete-orphan")
