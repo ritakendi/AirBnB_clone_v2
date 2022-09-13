@@ -1,7 +1,6 @@
 #!/usr/bin/python3
-""" the file storage class """
+"""This is the file storage class for AirBnB"""
 import json
-import os
 from models.base_model import BaseModel
 from models.user import User
 from models.state import State
@@ -12,48 +11,98 @@ from models.review import Review
 
 
 class FileStorage:
-    """ 
-        serializes and deserializes files to JSOn and back 
+    """This class serializes instances to a JSON file and
+    deserializes JSON file to instances
+    Attributes:
+        __file_path: path to the JSON file
+        __objects: objects will be stored
     """
-
     __file_path = "file.json"
     __objects = {}
+    __clsdict = {
+        "User": User,
+        "State": State,
+        "City": City,
+        "Amenity": Amenity,
+        "Place": Place,
+        "Review": Review
+    }
 
-    def all(self):
-        """ returns the dictionary __objects """
-        return self.__objects
+    def all(self, cls=None):
+        """returns a dictionary
+        Return:
+            returns a dictionary of __object
+        """
+        if cls is not None:
+            objects = {}
+            for k, v in self.__objects.items():
+                if cls.__module__[7:].capitalize() in k:
+                    objects[k] = v
+            return objects
+        else:
+            return self.__objects
+
+    """
+        def all(self, cls=None):
+        "returns a dictionary
+        Return:
+            returns a dictionary of __object
+        "
+        if isinstance(cls, str):
+            self.__clsdict.get(cls)
+        else:
+            cls = cls
+        if cls is not None:
+            objects = {}
+            for k, v in self.__objects.items():
+                if cls.__module__[7:].capitalize() in k:
+                    objects[k] = v
+            return objects
+        else:
+            return self.__objects
+    """
+
 
     def new(self, obj):
-        """ sets in __objects to the obj with key <obj class name>.id """
-        # get the object's class's name, add a . and id
-        # so it would be BaseModel.ID
-        self.__objects[obj.__class__.__name__ + "." + str(obj.id)] = obj
+        """sets __object to given obj
+        Args:
+            obj: given object
+        """
+        if obj:
+            key = "{}.{}".format(type(obj).__name__, obj.id)
+            self.__objects[key] = obj
 
     def save(self):
-        """ serializes __objects to the JSON file path """
-        # get all the items in __objects, which are dicts
-        # loop through all they keys and values.
-        # do dict comprehension, for each key and value(to dictionary method)
-        x = json.dumps({k: v.to_dict() for k, v in self.__objects.items()})
-        with open(self.__file_path, mode='w', encoding='utf-8') as f:
-            f.write(x)
+        """serialize the file path to JSON file path
+        """
+        my_dict = {}
+        for key, value in self.__objects.items():
+            my_dict[key] = value.to_dict()
+        with open(self.__file_path, 'w', encoding="UTF-8") as f:
+            json.dump(my_dict, f)
 
     def reload(self):
-        """ deserializes the JSON file to __objects, if path exists or do
-        nothing. no exceptions should raise """
-        # create a Dict that matched keys with values
-        # keys are strings and values are the classes of the values
-        obj_dict = {"BaseModel": BaseModel, "User": User, "State": State,
-                    "City": City, "Amenity": Amenity, "Place": Place,
-                    "Review": Review}
-        # check if the file is even there first
-        if os.path.isfile(self.__file_path):
-            # attempt to open that file and load the string that we read
-            with open(self.__file_path, mode='r', encoding='utf-8') as f:
-                x = json.loads(f.read())
-                for k, v in x.items():
-                    self.__objects[k] = obj_dict[v["__class__"]](**v)
-                # We read a dict, we iterate or enumerate through it
-                # We make a new __object[key] in file storage that
-                # Does access magic with the obj_dict. stores in the data
-                # It works. You jut need to believe
+        """serialize the file path to JSON file path
+        """
+        try:
+            with open(self.__file_path, 'r', encoding="UTF-8") as f:
+                for key, value in (json.load(f)).items():
+                    value = eval(value["__class__"])(**value)
+                    self.__objects[key] = value
+        except FileNotFoundError:
+            pass
+
+    def delete(self, obj=None):
+        """ deletes an object from __objects if it is inside
+        """
+        if obj is not None:
+            key = "{}.{}".format(type(obj).__name__, obj.id)
+            del self.__objects[key]
+            self.save()
+        # except:
+        # print("BRING SAD PEPE AND THICC SEAHORSE BACK")
+        # print("THE OBJECT: {}".format(obj))
+
+    def close(self):
+        """ calls on reload """
+        self.reload()
