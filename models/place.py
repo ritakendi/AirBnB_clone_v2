@@ -19,6 +19,7 @@ place_amenity = Table(
                                    primary_key=True,
                                    nullable=False))
 
+
 class Place(BaseModel, Base):
     """This is the class for Place
     Attributes:
@@ -72,7 +73,7 @@ class Place(BaseModel, Base):
                              secondary="place_amenity",
                              viewonly="False",
                              backref="place")
-                             
+
     @property
     def reviews(self):
         """ getter attribute for reviews of places """

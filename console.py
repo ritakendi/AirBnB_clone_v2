@@ -54,7 +54,7 @@ class HBNBCommand(cmd.Cmd):
             for k, v in arg_dict.items():
                 if hasattr(obj, k):
                     # if '"' in v[1:-1]:
-                        # v = v[1:-1].replace('"', '\"')
+                    # v = v[1:-1].replace('"', '\"')
                     if '_' in v:
                         v = v.replace('_', ' ')
                     if v.isdigit():
