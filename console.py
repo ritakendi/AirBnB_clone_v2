@@ -96,17 +96,17 @@ class HBNBCommand(cmd.Cmd):
     # The above is for Console 0.0.1
     # Below is for Console 0.1 or task 7 and onwards
         Args:
-           arg (str): the argument
+           arg (str): the argument"""
     def do_create(self, line):
-        Creates a new instance of BaseModel, saves to a JSON file,
-        and prints the ID when finished """
-        Returns:
+        """Creates a new instance of BaseModel, saves to a JSON file,
+        and prints the ID when finished
+        Returns:"""
             bool: True if successful, False otherwise.
         if len(line) < 1:  # if no arguments passed
             print("** class name missing **")
         elif line not in HBNBCommand.classes:
             print("** class doesn't exist **")  # if class doesn't exist
-        """
+        
         if "=" in arg:
             return True
         else:
