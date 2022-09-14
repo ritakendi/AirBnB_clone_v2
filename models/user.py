@@ -16,8 +16,3 @@ class User(BaseModel, Base):
     last_name = Column(String(128), nullable=False)
     places = relationship("Place", backref="user", cascade="all, delete")
     reviews = relationship("Review", backref="user", cascade="all, delete")
-Footer
-© 2022 GitHub, Inc.
-Footer navigation
-Terms
-Privacy
