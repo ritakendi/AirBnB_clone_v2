@@ -6,6 +6,18 @@ from sqlalchemy import Table
 from sqlalchemy.orm import relationship, backref
 from os import getenv
 
+place_amenity = Table(
+                            "place_amenity", Base.metadata,
+                            Column('place_id',
+                                   String(60),
+                                   ForeignKey('places.id'),
+                                   primary_key=True,
+                                   nullable=False),
+                            Column('amenity_id',
+                                   String(60),
+                                   ForeignKey('amenities.id'),
+                                   primary_key=True,
+                                   nullable=False))
 
 class Place(BaseModel, Base):
     """This is the class for Place
@@ -60,20 +72,7 @@ class Place(BaseModel, Base):
                              secondary="place_amenity",
                              viewonly="False",
                              backref="place")
-
-    place_amenity = Table(
-                            "place_amenity", Base.metadata,
-                            Column('place_id',
-                                   String(60),
-                                   ForeignKey('places.id'),
-                                   primary_key=True,
-                                   nullable=False),
-                            Column('amenity_id',
-                                   String(60),
-                                   ForeignKey('amenities.id'),
-                                   primary_key=True,
-                                   nullable=False))
-
+                             
     @property
     def reviews(self):
         """ getter attribute for reviews of places """
