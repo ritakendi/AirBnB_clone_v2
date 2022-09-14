@@ -1,12 +1,23 @@
 #!/usr/bin/python3
-""" A Review class that inherits from BaseModel """
+"""This is the review class"""
+from models.base_model import BaseModel, Base
+from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy.orm import relationship, backref
 
-from models.base_model import BaseModel
 
-
-class Review(BaseModel):
-    """ Inherits from BaseModel,
-    instantiate with empty string as values for attributes """
-    place_id = ""
-    user_id = ""
-    text = ""
+class Review(BaseModel, Base):
+    """This is the class for Review
+    Attributes:
+        place_id: place id
+        user_id: user id
+        text: review description
+    """
+    __tablename__ = "reviews"
+    text = Column(String(128),
+                  nullable=False)
+    place_id = Column(String(60),
+                      ForeignKey("places.id"),
+                      nullable=False)
+    user_id = Column(String(60),
+                     ForeignKey("users.id"),
+                     nullable=False)
