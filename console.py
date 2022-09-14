@@ -98,7 +98,7 @@ class HBNBCommand(cmd.Cmd):
         Args:
            arg (str): the argument
     def do_create(self, line):
-        """ Creates a new instance of BaseModel, saves to a JSON file,
+        Creates a new instance of BaseModel, saves to a JSON file,
         and prints the ID when finished """
         Returns:
             bool: True if successful, False otherwise.
