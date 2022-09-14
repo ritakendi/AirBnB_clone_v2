@@ -101,7 +101,7 @@ class HBNBCommand(cmd.Cmd):
         """Creates a new instance of BaseModel, saves to a JSON file,
         and prints the ID when finished
         Returns:"""
-            bool: True if successful, False otherwise.
+        bool: True if successful, False otherwise.
         if len(line) < 1:  # if no arguments passed
             print("** class name missing **")
         elif line not in HBNBCommand.classes:
