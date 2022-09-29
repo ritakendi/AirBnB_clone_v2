@@ -1,72 +1,64 @@
 #!/usr/bin/python3
-"""A module for web application deployment with Fabric."""
-import os
+"""Creates and distributes an archive to servers"""
 from datetime import datetime
-<<<<<<< HEAD
-from fabric.api import env, local, put, run, runs_once
-=======
-from os.path import exists, isdir
-env.hosts = ['44.197.209.145', '3.239.89.107']
->>>>>>> 55b1f1f3e3b4886495487fab9b780b1466dde8b8
+from fabric.api import *
+import os
+import shlex
 
 
-env.hosts = ["34.73.0.174", "35.196.78.105"]
-"""The list of host server IP addresses."""
-
-
-@runs_once
-def do_pack():
-    """Archives the static files."""
-    if not os.path.isdir("versions"):
-        os.mkdir("versions")
-    cur_time = datetime.now()
-    output = "versions/web_static_{}{}{}{}{}{}.tgz".format(
-        cur_time.year,
-        cur_time.month,
-        cur_time.day,
-        cur_time.hour,
-        cur_time.minute,
-        cur_time.second
-    )
-    try:
-        print("Packing web_static to {}".format(output))
-        local("tar -cvzf {} web_static".format(output))
-        archize_size = os.stat(output).st_size
-        print("web_static packed: {} -> {} Bytes".format(output, archize_size))
-    except Exception:
-        output = None
-    return output
-
-
-def do_deploy(archive_path):
-    """Deploys the static files to the host servers.
-    Args:
-        archive_path (str): The path to the archived static files.
-    """
-    if not os.path.exists(archive_path):
-        return False
-    file_name = os.path.basename(archive_path)
-    folder_name = file_name.replace(".tgz", "")
-    folder_path = "/data/web_static/releases/{}/".format(folder_name)
-    success = False
-    try:
-        put(archive_path, "/tmp/{}".format(file_name))
-        run("mkdir -p {}".format(folder_path))
-        run("tar -xzf /tmp/{} -C {}".format(file_name, folder_path))
-        run("rm -rf /tmp/{}".format(file_name))
-        run("mv {}web_static/* {}".format(folder_path, folder_path))
-        run("rm -rf {}web_static".format(folder_path))
-        run("rm -rf /data/web_static/current")
-        run("ln -s {} /data/web_static/current".format(folder_path))
-        print('New version deployed!')
-        success = True
-    except Exception:
-        success = False
-    return success
+env.hosts = ['34.231.21.62', '34.231.110.215']
+env.user = "ubuntu"
 
 
 def deploy():
-    """Archives and deploys the static files to the host servers.
-    """
-    archive_path = do_pack()
-    return do_deploy(archive_path) if archive_path else False
+    """creates and distributes archive"""
+    try:
+        archive_path = do_pack()
+    except Exception:
+        return False
+
+    return do_deploy(archive_path)
+
+
+def do_pack():
+    """generates tgz archive"""
+    try:
+        if not os.path.exists("versions"):
+            local('mkdir versions')
+        t = datetime.now()
+        f = "%Y%m%d%H%M%S"
+        archive_path = 'versions/web_static_{}.tgz'.format(t.strftime(f))
+        local('tar -cvzf {} web_static'.format(archive_path))
+        return archive_path
+    except Exception:
+        return None
+
+
+def do_deploy(archive_path):
+    """deploys archive to servers"""
+    if not os.path.exists(archive_path):
+        return False
+    try:
+        name = archive_path.replace('/', ' ')
+        name = shlex.split(name)
+        name = name[-1]
+
+        wname = name.replace('.', ' ')
+        wname = shlex.split(wname)
+        wname = wname[0]
+
+        releases_path = "/data/web_static/releases/{}/".format(wname)
+        tmp_path = "/tmp/{}".format(name)
+
+        put(archive_path, "/tmp/")
+        run("mkdir -p {}".format(releases_path))
+        run("tar -xzf {} -C {}".format(tmp_path, releases_path))
+        run("rm {}".format(tmp_path))
+        run("mv {}web_static/* {}".format(releases_path, releases_path))
+        run("rm -rf {}web_static".format(releases_path))
+        run("rm -rf /data/web_static/current")
+        run("ln -s {} /data/web_static/current".format(releases_path))
+        print("New version deployed!")
+        return True
+    except Exception:
+        return False
